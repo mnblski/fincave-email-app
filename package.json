@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "imapflow": "^1.0.128"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "scripts": {
+    "start": "node main.js",
+    "dev": "nodemon main.js"
+  }
+}
