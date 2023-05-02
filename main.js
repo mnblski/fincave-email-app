@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const { google } = require('googleapis');
 const { ImapFlow } = require('imapflow');
 const express = require('express');
@@ -6,19 +7,17 @@ const axios = require('axios');
 
 const app = express();
 
-
 app.listen(3000, () => {
   console.log('Server is listening on port 3000');
 });
 
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly', 'https://mail.google.com/'];
 
-
 async function getAuthenticatedClient() {
     const oauth2Client = new google.auth.OAuth2(
-      process.env.GMAIL_CLIENT_ID,
-      process.env.GMAIL_CLIENT_SECRET,
-      process.env.GMAIL_CLIENT_REDIRECT_URI,
+      process.env.GOOGLE_OUATH_CLIENT_ID,
+      process.env.GOOGLE_OAUTH_CLIENT_SECRET,
+      process.env.GOOGLE_OUATH_CLIENT_REDIRECT_URI
     );
   
     const authorizeUrl = oauth2Client.generateAuthUrl({
@@ -34,14 +33,14 @@ async function getAuthenticatedClient() {
     console.log('gmail', gmail);
   })();
 
-app.get('/', async (req, res) => {
+app.get('/auth/google/callback', async (req, res) => {
     const authorizationCode = req.query.code;
 
     const params = new URLSearchParams();
     params.append('code', authorizationCode);
-    params.append('client_id', process.env.GMAIL_CLIENT_ID);
-    params.append('client_secret', process.env.GMAIL_CLIENT_SECRET);
-    params.append('redirect_uri', process.env.GMAIL_CLIENT_REDIRECT_URI);
+    params.append('client_id', process.env.GOOGLE_OUATH_CLIENT_ID);
+    params.append('client_secret', process.env.GOOGLE_OAUTH_CLIENT_SECRET);
+    params.append('redirect_uri', process.env.GOOGLE_OUATH_CLIENT_REDIRECT_URI);
     params.append('grant_type', 'authorization_code');
 
     console.log('params', params);
