@@ -1,17 +1,17 @@
 {
   "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
     "axios": "^1.4.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "googleapis": "^118.0.0",
-    "imapflow": "^1.0.128",
-    "readline": "^1.3.0",
-    "util": "^0.12.5"
+    "googleapis": "^105.0.0",
+    "imapflow": "^1.0.128"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
   },
   "scripts": {
+    "gmail": "node gmail/init.js",
     "start": "node main.js",
     "dev": "nodemon main.js"
   }
