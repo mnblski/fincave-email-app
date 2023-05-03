@@ -1,4 +1,7 @@
 {
+  "name": "fincave-email-app",
+  "version": "0.1.0-alpha.1",
+  "author": "Marcel Niebylski",
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.0",
     "axios": "^1.4.0",
