@@ -3,6 +3,7 @@ const path = require('path');
 const process = require('process');
 const {authenticate} = require('@google-cloud/local-auth');
 const {google} = require('googleapis');
+const { extractPurchaseDataAI } = require('../openai/lib/extractPurchaseDataAI');
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
@@ -97,14 +98,13 @@ async function listLabels(auth) {
         id: messages.data.messages[0].id,
     })
 
-    console.log('lastMessage', lastMessage.data)
-
     for (let i = 0; i < lastMessage.data.payload.parts.length; i++) {
         var part = lastMessage.data.payload.parts[i];
 
-        console.log('part', part);
 
         switch (part?.mimeType) {
+            case 'multipart/related':
+            case 'multipart/mixed':
             case 'multipart/alternative':
 
              for (let i = 0; i < part.parts.length; i++) {
@@ -112,18 +112,19 @@ async function listLabels(auth) {
 
                 switch (subPart?.mimeType) {
                     case 'text/plain':
-                        console.log('text/plain', decodeBase64(subPart.body.data));
+                        // console.log('subPart - text/plain', decodeBase64(subPart.body.data));
                         break;
         
                     case 'text/html':
-                        console.log('SHOULD HAVEN OT WHITE SPACE', decodeBase64(subPart.body.data).replace(/<\/?[^>]+(>|$)/g, "").replace(/\s+/g, " "));
+                        // console.log('subPart - SHOULD HAVEN OT WHITE SPACE', decodeBase64(subPart.body.data).replace(/<\/?[^>]+(>|$)/g, "").replace(/\s+/g, " "));
+                        await extractPurchaseDataAI(decodeBase64(subPart.body.data).replace(/<\/?[^>]+(>|$)/g, "").replace(/\s+/g, " "));
                         break;
                 }
              }
 
             case 'text/plain':
                 if (part.body.data) {
-                    console.log('text/plain', decodeBase64(part.body.data));
+                    // console.log('part - text/plain', decodeBase64(part.body.data));
                 }
                 break;
 
@@ -131,7 +132,7 @@ async function listLabels(auth) {
                 if (part.body.data) {
                     // ? replace(/<\/?[^>]+(>|$)/g, "") - removes all html tags
                     // ? replace(/\s\s+/g, ' ') - removes all extra spaces and live only single space
-                    console.log('text/html', decodeBase64(part.body.data))
+                    // console.log('part - text/html', decodeBase64(part.body.data))
                     // console.log('text/html', decodeBase64(part.body.data).replace(/<\/?[^>]+(>|$)/g, "").replace(/\s+/g, ''));
                 }
                 break;
