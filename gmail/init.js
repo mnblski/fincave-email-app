@@ -4,6 +4,8 @@ const process = require('process');
 const {authenticate} = require('@google-cloud/local-auth');
 const {google} = require('googleapis');
 const { extractPurchaseDataAI } = require('../openai/lib/extractPurchaseDataAI');
+const { getMessageParts } = require('./lib/extractMessagePayload');
+const e = require('express');
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
@@ -74,10 +76,7 @@ async function authorize() {
   return client;
 }
 
-function decodeBase64(base64str) {
-    const buffer = Buffer.from(base64str, 'base64');
-    return buffer.toString('utf8');
-}
+
 /**
  * Lists the labels in the user's account.
  *
@@ -86,58 +85,93 @@ function decodeBase64(base64str) {
 async function listLabels(auth) {
   const gmail = google.gmail({version: 'v1', auth});
 
-
-    const messages = await gmail.users.messages.list({
-        userId: 'me',
+  try {
+    const messagesPage = await gmail.users.messages.list({
+      userId: 'me',
+      maxResults: 1
     })
 
-    console.log('messages', messages.data.messages)
+    console.log('messagesPage', messagesPage.data.messages);
 
-    const lastMessage = await gmail.users.messages.get({
-        userId: 'me',
-        id: messages.data.messages[0].id,
-    })
+    if (messagesPage.data?.messages?.length) {
 
-    for (let i = 0; i < lastMessage.data.payload.parts.length; i++) {
-        var part = lastMessage.data.payload.parts[i];
+      for (let i = 0; i < messagesPage.data.messages.length; i++) {
+        const message = messagesPage.data.messages[i];
+
+        console.log('message', message)
+
+        const m = await gmail.users.messages.get({
+          userId: 'me',
+          id: message.id,
+        })
+
+        console.log('m', m.data);
+        // console.log('headers', m.data.payload.headers);
+        // console.log('body', m.data.payload.body);
+        // console.log('parts', m.data.payload.parts);
+
+        console.log('ALL PARTS', getMessageParts(m.data.payload));
+
+        const test = await extractPurchaseDataAI(getMessageParts(m.data.payload))
+      
 
 
-        switch (part?.mimeType) {
-            case 'multipart/related':
-            case 'multipart/mixed':
-            case 'multipart/alternative':
+        return test;
 
-             for (let i = 0; i < part.parts.length; i++) {
-                var subPart = part.parts[i];
 
-                switch (subPart?.mimeType) {
-                    case 'text/plain':
-                        // console.log('subPart - text/plain', decodeBase64(subPart.body.data));
-                        break;
-        
-                    case 'text/html':
-                        // console.log('subPart - SHOULD HAVEN OT WHITE SPACE', decodeBase64(subPart.body.data).replace(/<\/?[^>]+(>|$)/g, "").replace(/\s+/g, " "));
-                        await extractPurchaseDataAI(decodeBase64(subPart.body.data).replace(/<\/?[^>]+(>|$)/g, "").replace(/\s+/g, " "));
-                        break;
-                }
-             }
-
-            case 'text/plain':
-                if (part.body.data) {
-                    // console.log('part - text/plain', decodeBase64(part.body.data));
-                }
-                break;
-
-            case 'text/html':
-                if (part.body.data) {
-                    // ? replace(/<\/?[^>]+(>|$)/g, "") - removes all html tags
-                    // ? replace(/\s\s+/g, ' ') - removes all extra spaces and live only single space
-                    // console.log('part - text/html', decodeBase64(part.body.data))
-                    // console.log('text/html', decodeBase64(part.body.data).replace(/<\/?[^>]+(>|$)/g, "").replace(/\s+/g, ''));
-                }
-                break;
-        }
+      }
     }
+    
+  } catch (error) {
+      console.log('err', error);
+  }
+
+    
+    // const lastMessage = await gmail.users.messages.get({
+    //     userId: 'me',
+    //     id: messages.data.messages[0].id,
+    // })
+
+    // for (let i = 0; i < lastMessage.data.payload.parts.length; i++) {
+    //     var part = lastMessage.data.payload.parts[i];
+
+
+    //     switch (part?.mimeType) {
+    //         case 'multipart/related':
+    //         case 'multipart/mixed':
+    //         case 'multipart/alternative':
+
+    //          for (let i = 0; i < part.parts.length; i++) {
+    //             var subPart = part.parts[i];
+
+    //             switch (subPart?.mimeType) {
+    //                 case 'text/plain':
+    //                     // console.log('subPart - text/plain', decodeBase64(subPart.body.data));
+    //                     break;
+        
+    //                 case 'text/html':
+    //                     // console.log('subPart - SHOULD HAVEN OT WHITE SPACE', decodeBase64(subPart.body.data).replace(/<\/?[^>]+(>|$)/g, "").replace(/\s+/g, " "));
+    //                     await extractPurchaseDataAI(decodeBase64(subPart.body.data).replace(/<\/?[^>]+(>|$)/g, "").replace(/\s+/g, " "));
+    //                     break;
+    //             }
+    //          }
+
+    //         case 'text/plain':
+    //             if (part.body.data) {
+    //                 // console.log('part - text/plain', decodeBase64(part.body.data));
+    //             }
+    //             break;
+
+    //         case 'text/html':
+    //             if (part.body.data) {
+    //                 // ? replace(/<\/?[^>]+(>|$)/g, "") - removes all html tags
+    //                 // ? replace(/\s\s+/g, ' ') - removes all extra spaces and live only single space
+    //                 // console.log('part - text/html', decodeBase64(part.body.data))
+    //                 // console.log('text/html', decodeBase64(part.body.data).replace(/<\/?[^>]+(>|$)/g, "").replace(/\s+/g, ''));
+    //             }
+    //             break;
+    //     }
+    // }
 }
 
 authorize().then(listLabels).catch(console.error);
