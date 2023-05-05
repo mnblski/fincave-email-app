@@ -1,15 +1,18 @@
 const { openaiInstance } = require("../init");
 
 const instructions = {
-    'email_purchase_data': 'Based on provided text, can you list all purchased product with their prices, total cost breakdown, seller information like name and website as well as date of purchase. Also, return the response in json format.'
+    'email_purchase_data': 'Based on this email, extract the following purchase data: store name, purchase date, total cost, cost breakdown, items. Return response in JSON format',
 }
+    
 
 async function extractPurchaseDataAI(textFromEmail) {
+
+    // console.log('t', textFromEmail);
+
     try {
         const response = await openaiInstance.createCompletion({
             model: 'text-davinci-003',
-            prompt: `Please extract and return in JSON all purcha:
-                     ${textFromEmail}`,
+            prompt: `Based on this email, extract the following purchase data: Store Name, Date, Total, Items Purchased. Return response in JSON format: ${textFromEmail}`,
             max_tokens: 2000,
             temperature: 0.5
            })
