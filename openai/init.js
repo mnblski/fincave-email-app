@@ -1,5 +1,6 @@
 
 require('dotenv').config();
+
 const { Configuration, OpenAIApi } = require("openai");
 let openaiInstance = null;
 
