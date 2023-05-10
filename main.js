@@ -29,6 +29,10 @@ app.use(`${API_BASE_PATH}/user`, userRouter);
 // app.use("/order", orderRouter);
 // app.use("/product", productRouter);
 
+// user -> assets -> product
+// user -> orders -> product
+// user -> products
+
 
 /** error handling middleware */
 app.use(errorLogger);
