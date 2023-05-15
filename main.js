@@ -13,9 +13,9 @@ const {errorHandler, errorLogger} = require("./middleware/error.middleware");
 
 // const authRouter = require("./routes/auth.routes");
 const userRouter = require("./userService/router");
-// const assetsRouter = require("./routes/asset.routes");
+const assetsRouter = require("./assetsService/router");
+const ordersRouter = require("./ordersService/router");
 // const productRouter = require("./routes/asset.routes");
-// const orderRouter = require("./routes/asset.routes");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -25,8 +25,8 @@ app.use(cors(corsConfig));
 /** isolated Routers with Route controllers */
 // app.use("/auth", authRouter);
 app.use(`${API_BASE_PATH}/user`, userRouter);
-// app.use("/assets", assetsRouter);
-// app.use("/order", orderRouter);
+app.use(`${API_BASE_PATH}/assets`, assetsRouter);
+app.use(`${API_BASE_PATH}/orders`, ordersRouter);
 // app.use("/product", productRouter);
 
 // user -> assets -> product
