@@ -11,10 +11,9 @@ const API_BASE_PATH = process.env.API_BASE_PATH;
 
 const {errorHandler, errorLogger} = require("./middleware/error.middleware");
 
-// const authRouter = require("./routes/auth.routes");
-const userRouter = require("./userService/router");
-const assetsRouter = require("./assetsService/router");
-const ordersRouter = require("./ordersService/router");
+const userRouter = require("./services/user_services/router");
+const assetsRouter = require("./services/assets_services/router");
+// const ordersRouter = require("./ordersService/router");
 // const productRouter = require("./routes/asset.routes");
 
 app.use(express.json());
@@ -23,10 +22,9 @@ app.use(cookieParser());
 app.use(cors(corsConfig));
 
 /** isolated Routers with Route controllers */
-// app.use("/auth", authRouter);
 app.use(`${API_BASE_PATH}/user`, userRouter);
 app.use(`${API_BASE_PATH}/assets`, assetsRouter);
-app.use(`${API_BASE_PATH}/orders`, ordersRouter);
+// app.use(`${API_BASE_PATH}/orders`, ordersRouter);
 // app.use("/product", productRouter);
 
 // user -> assets -> product
