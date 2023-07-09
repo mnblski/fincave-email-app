@@ -1,2 +1,2 @@
-# fincave-email-app
-Email Client
+# fincave-api
+Fincave API gateway
