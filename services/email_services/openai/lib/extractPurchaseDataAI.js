@@ -92,25 +92,46 @@ const instructions = {
          // what if there are multiple products with the same SKU?
     }
 
-async function getProductFromOrderJSON(orderJSON) {
-    return new Promise(async (resolve, reject) => {
-        if (!orderJSON?.items || orderJSON.items.length === 0) {
-            reject('There are no items in this order');
-        }
+    // returns array of uuids
+    async function getProductFromOrderJSON(orderJSON) {
+        return new Promise(async (resolve, reject) => {
+            if (!orderJSON?.items || orderJSON.items.length === 0) {
+                reject('There are no items in this order');
+            }
+    
+            const allProductFromOrder = [];
+    
+            for (let i = 0; i < orderJSON.items.length; i++) {
+                const item = orderJSON.items[i];
+    
+                const productFromDB = await getProductFromDB(item); // logic to look up items in database / API
+    
+                if (productFromDB) {
+                    allProductFromOrder.push(productFromDB.uuid);
 
-        const allProductFromOrder = [];
+                } else {
+                    const productFromProductAPI = await getProductFromProductAPI(item); // product api lookup
 
-        for (let i = 0; i < orderJSON.items.length; i++) {
-            const item = orderJSON.items[i];
+                    let newProduct;
+    
+                    if (productFromProductAPI) {
+                        newProduct = await postProductFromProductAPI(productFromProductAPI); // add to fincave db
 
-            // logic to look up items in database / API
-            const productId = await getProductFromDatabase(item);
-            allProductFromOrder.push(productId);
-        }
+                    } else {
+                        const res = await postProductFromOrderJSON(orderJSON); // add to fincave db
 
-        resolve(allProductFromOrder);
-    });
-};
+                        if (res.status === 'success') {
+                            newProduct = res.data;
+                        }
+                    }
+
+                    allProductFromOrder.push(newProduct.uuid);   // once added use uuid
+                }
+            }
+    
+            resolve(allProductFromOrder);
+        });
+    };
     
 
 async function extractPurchaseDataAI(textFromEmail) {
@@ -142,6 +163,14 @@ async function extractPurchaseDataAI(textFromEmail) {
 
         //   4. return ids of all entities created
 
+        // return data if following format}
+
+        data = {
+            meta: {},
+            items: [ { meta: {}, product_uuid: 'uuid' } ],
+            uuid: 'uuid',
+    }
+
 
           return response;
 
@@ -151,3 +180,18 @@ async function extractPurchaseDataAI(textFromEmail) {
 }
 
 module.exports = { extractPurchaseDataAI };
+
+
+// 1. receive notificaiton about mailbox changes 
+
+// 2. check if this is a new message 
+
+// 3. do partial sync
+
+// 3. if new message, extract order and items data
+
+// 4. run product logic and create order data
+
+// 5. create asset data using order data -> update UI
+
+

@@ -112,7 +112,24 @@ async function listLabels(auth) {
 
         console.log('ALL PARTS', getMessageParts(m.data.payload));
 
+
+        // onMessageChange
+
+        // check if an event was new message was created
+
+        // check if this is an order confirmation email
+
+        // run handlePurchaseEmail 
+            // extractPurchaseDataAI
+            // run product logic
+            // create order data (inc. product data)
+            // create asset data based on the order data
+            // update UI with new entities
+
+
         const test = await extractPurchaseDataAI(getMessageParts(m.data.payload))
+
+
       
 
 
