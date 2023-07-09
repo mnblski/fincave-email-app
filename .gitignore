@@ -1,4 +1,4 @@
 .env
 node_modules
-firebaseService/credentials.json
+lib/firebase/credentials.json
 ```
