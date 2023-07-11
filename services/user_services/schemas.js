@@ -11,15 +11,26 @@ const postUserSchema = Joi
         .min(3)
         .max(30)
         .required(),
-    email: Joi.string().email({ tlds: { allow: false } }).required(),
-    password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required(), /** min 6 chars */
+    primary_email: Joi.string().email({ tlds: { allow: false } }).required(),
   })
   .options({
     abortEarly: false
 });
 
-
+const patchUserSchema = Joi
+  .object({
+    username: Joi.string()
+        .alphanum()
+        .min(3)
+        .max(30),
+    primary_email: Joi.string().email({ tlds: { allow: false } }),
+    archived: Joi.boolean()
+  })
+  .options({
+    abortEarly: false
+});
 
 module.exports = {
-    postUserSchema
+    postUserSchema,
+    patchUserSchema
 }

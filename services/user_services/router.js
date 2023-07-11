@@ -6,7 +6,7 @@ const { db } = require("../../lib/firebase/main");
 const { fail, sendSuccess } = require("../../utils/res.utils");
 const { verifyToken } = require("../../middleware/auth.middleware");
 const { validate } = require("../../middleware/validation.middleware");
-const { postUserSchema, putUserSchema } = require('./schemas');
+const { postUserSchema, patchUserSchema } = require('./schemas');
 
 const router = express.Router();
 
@@ -63,7 +63,7 @@ router.post("/", verifyToken, validate(postUserSchema), async (req, res, next) =
     });
 })
 
-router.patch("/", verifyToken, validate(putUserSchema), async (req, res, next) => {
+router.patch("/", verifyToken, validate(patchUserSchema), async (req, res, next) => {
     const { email, username, ...rest } = req.body;
 
     let data = {
